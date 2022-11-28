@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Kashus24/tinyapp/issues"
   },
-  "homepage": "https://github.com/Kashus24/tinyapp#readme"
+  "homepage": "https://github.com/Kashus24/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
