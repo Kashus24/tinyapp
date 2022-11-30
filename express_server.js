@@ -6,10 +6,28 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 
+
+const users = {
+  user1: {
+    id: "000000",
+    email: "first@hotmail.com",
+    password: "first"
+  },
+  user2: {
+    id: "123456",
+    email: "second@hotmail.com",
+    password: "second"
+  }
+
+};
+
+
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
 
 
 const generateRandomString = () => {
@@ -77,11 +95,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls`);
 });
 
-
-
-
-
-
 app.get("/urls/new", (req, res) => {
 
   const templateVars = {
@@ -99,8 +112,6 @@ app.get("/urls/:id", (req, res) => {
     username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
-
-
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
@@ -131,7 +142,6 @@ app.post("/urls/:id/edit", (req, res) => {
 
 
 
-
 app.get("/register", (req, res) => {
 
   const templateVars = {
@@ -141,6 +151,17 @@ app.get("/register", (req, res) => {
 });
 
 
+app.post("/register", (req, res) => {
+  let userID = generateRandomString();
+  users[userID] =  {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie('userID', userID);
+  console.log(users)
+  res.redirect("/urls");
+});
 
 
 
