@@ -29,12 +29,13 @@ const urlDatabase = {
 
 
 
-const userFinder = (user_id) => {
+const userFinder = (email) => {
   for (let user in users) {
-    if (user_id === users[user].id) {
+    if (email === users[user].email) {
       return user;
     }
   }
+  return null;
 };
 
 
@@ -165,11 +166,23 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   let userID = generateRandomString();
+ 
+  if (req.body.email === "" || req.body.password === "") {
+    return res.status(400).send("Credentials are empty");
+
+  }
+
+  if (userFinder(req.body.email === null)) {
+    return res.status(400).send("user is already registered");
+
+  }
+
   users[userID] =  {
     id: userID,
     email: req.body.email,
     password: req.body.password
   }
+
   res.cookie('user_id', userID);
   // console.log(users)
   res.redirect("/urls");
