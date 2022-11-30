@@ -25,7 +25,6 @@ const generateRandomString = () => {
 };
 
 
-
 app.use(express.urlencoded({ extended: true }));
 
 //cookie parser package
@@ -51,6 +50,9 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+
+
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -74,6 +76,10 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls`);
 });
+
+
+
+
 
 
 app.get("/urls/new", (req, res) => {
@@ -122,6 +128,20 @@ app.post("/urls/:id/edit", (req, res) => {
    urlDatabase[req.params.id] = req.body.longURL;
   res.redirect('/urls');
 });
+
+
+
+
+app.get("/register", (req, res) => {
+
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_register", templateVars);
+});
+
+
+
 
 
 app.listen(PORT, () => {
