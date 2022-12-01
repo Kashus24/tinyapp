@@ -87,14 +87,18 @@ app.post("/logout", (req, res) => {
 // get login page
 
 app.get("/login", (req, res) => {
-
+  const userOn = req.cookies.user_id;
   const templateVars = { 
     urls: urlDatabase, 
     user: users[req.cookies.user_id],
   }
 
-  res.render("urls_login", templateVars);
-})
+  if (userOn) {
+    res.redirect("/urls");
+  } else {
+    res.render("urls_login", templateVars);
+  }
+});
 
 
 
@@ -121,18 +125,27 @@ app.get("/urls", (req, res) => {
 });
  
 app.post("/urls", (req, res) => {
-
+  const userOn = req.cookies.user_id;
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls`);
+
+  if (!userOn) {
+    res.send("You must log in to edit URLs!\n")
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls/new", (req, res) => {
-
+  const userOn = req.cookies.user_id;
   const templateVars = {
     user: users[req.cookies.user_id],
   };
+  if (!userOn) {
+    res.redirect("/login");
+  } else {
   res.render("urls_new", templateVars);
+  }
 });
 
 
@@ -146,9 +159,16 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+
   const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+
+  if (!urlDatabase[req.params.id]) {
+    res.send("Short URL does not exit.");
+  } else {
+    res.redirect(longURL);
+  }
 });
+
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
@@ -160,7 +180,7 @@ app.get("/urls/:id/edit", (req, res) => {
   const templateVars = { 
      id: req.params.id,
      longURL: urlDatabase[req.params.id],
-     user: users 
+     user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -175,13 +195,17 @@ app.post("/urls/:id/edit", (req, res) => {
 
 
 app.get("/register", (req, res) => {
-
+  const userOn = req.cookies.user_id;
   const templateVars = {
     user: users[req.cookies.user_id],
   };
-  res.render("urls_register", templateVars);
-});
 
+  if (userOn) {
+    res.redirect("/urls")
+  } else {
+    res.render("urls_register", templateVars);
+  } 
+});
 
 app.post("/register", (req, res) => {
 
