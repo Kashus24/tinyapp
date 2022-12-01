@@ -67,14 +67,28 @@ app.get("/", (req, res) => {
 
 //adding login 
 app.post("/login", (req, res) => {
+
+  // Change/ check this  ------------------------------------------------------
   res.cookie('username', req.body.username);
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
 });
+
+// get login page
+
+app.get("/login", (req, res) => {
+
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[req.cookies.user_id],
+  }
+
+  res.render("urls_login", templateVars);
+})
 
 
 
@@ -165,15 +179,22 @@ app.get("/register", (req, res) => {
 
 
 app.post("/register", (req, res) => {
+
+  res.redirect("/register");
+})
+
+
+
+app.post("/registerAccount", (req, res) => {
   let userID = generateRandomString();
  
   if (req.body.email === "" || req.body.password === "") {
-    return res.status(400).send("Credentials are empty");
+    return res.status(400).send("Error: Credentials are empty.");
 
   }
 
   if (userFinder(req.body.email === null)) {
-    return res.status(400).send("user is already registered");
+    return res.status(400).send("Error: User alredy exists.");
 
   }
 
