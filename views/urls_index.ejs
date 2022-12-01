@@ -25,8 +25,8 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
-            <th scope="col">Delete</th>
             <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
 
           </tr>
         </thead>
@@ -36,19 +36,17 @@
               <td><%= id %></td>
               <td><%= urls[id] %></td>
              <td>
-              <form action="/urls/<%= id %>/edit">
-                <!-- <input type="text" id="edit" name="urlEdit"> -->
-              <button type= 'edit'>Edit</button></form>
+              <a href='/urls/<%= id %>' class="btn btn-primary">Edit</a>
               </td>
               <td>
               <form method="POST" action="/urls/<%= id %>/delete">
-                <button type="submit">Delete</form>
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
              </td>
             </tr>
            
           <% } %>
           <tr>   </tr>
-          <a  href="#">URL shortform finder</a>
         </tbody>
         
       </table>
