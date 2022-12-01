@@ -23,8 +23,25 @@ const users = {
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b6UTxQ": {
+    longURL: "https://www.tsn.ca",
+    userID: "000000",
+  },
+  "i3BoGr": {
+    longURL: "https://www.google.ca",
+    userID: "000000",
+  },
+};
+
+
+const urlForUsers = (id) => {
+  let urlMatches = {};
+  for (let link in urlDatabase) {
+    if (urlDatabase[link].userID === id) {
+      urlMatches[link] = urlDatabase[link];
+    }
+  }
+  return urlMatches;
 };
 
 
@@ -36,8 +53,6 @@ const userFinder = (email) => {
   }
   return null;
 };
-
-
 
 const generateRandomString = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -85,7 +100,7 @@ app.post("/logout", (req, res) => {
 });
 
 // get login page
-
+// potential issue change urlDatabase ----------------------------------
 app.get("/login", (req, res) => {
   const userOn = req.cookies.user_id;
   const templateVars = { 
@@ -114,20 +129,26 @@ app.get("/hello", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
+  const userOn = req.cookies.user_id
   const templateVars = { 
     urls: urlDatabase, 
-    user: users[req.cookies.user_id],
+    user: users[userOn],
    };
 
-  //  console.log("user", users)
-  //  console.log("req", req.cookies.user_id);
-  res.render("urls_index", templateVars);
+   if (!userOn) {
+     return res.send("Must login or register to continue")
+   } else {
+    res.render("urls_index", templateVars);
+   }
 });
  
 app.post("/urls", (req, res) => {
   const userOn = req.cookies.user_id;
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  // Check if this is right ??
+  urlDatabase[shortURL] = { 
+    longURL: req.body.longURL,
+    userID: req.cookies.user_id};
 
   if (!userOn) {
     res.send("You must log in to edit URLs!\n")
@@ -141,26 +162,41 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
+ 
   if (!userOn) {
     res.redirect("/login");
   } else {
+
   res.render("urls_new", templateVars);
   }
 });
 
 
 app.get("/urls/:id", (req, res) => {
-  
+  const dataCheck = urlForUsers(req.cookies.user_id);
+  const userOn = req.cookies.user_id;
+  const shortURL = req.params.id;
+
   const templateVars = { 
     id: req.params.id, 
-    longURL: urlDatabase[req.params.id], 
-    user: users[req.cookies.user_id] };
-  res.render("urls_show", templateVars);
+    longURL: urlDatabase[req.params.id].longURL, 
+    user: users[req.cookies.user_id], 
+    urls: dataCheck };
+
+    if (!userOn) {
+      return res.send("Error: Please log in or register to continue.");
+    } else if (userOn !== urlDatabase[shortURL].userID) {
+      res.status(403).send("You can't edit a link you don't own")
+    } else {
+      res.render("urls_show", templateVars);
+    }
 });
 
-app.get("/u/:id", (req, res) => {
+// || userOn !== urlDatabase[shortURL].userID
 
-  const longURL = urlDatabase[req.params.id];
+app.get("/u/:id", (req, res) => {
+//testing
+  const longURL = urlDatabase[req.params.id].longURL;
 
   if (!urlDatabase[req.params.id]) {
     res.send("Short URL does not exit.");
@@ -171,15 +207,21 @@ app.get("/u/:id", (req, res) => {
 
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
+  const userOn = req.cookies.userID;
+
+  if (!userOn) {
+    return res.send("You must be logged in to delete.")
+  } else {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+  }
 });
 
 
 app.get("/urls/:id/edit", (req, res) => {
   const templateVars = { 
      id: req.params.id,
-     longURL: urlDatabase[req.params.id],
+     longURL: urlDatabase[req.params.id].longURL,
      user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
@@ -187,9 +229,14 @@ app.get("/urls/:id/edit", (req, res) => {
 
 
 app.post("/urls/:id/edit", (req, res) => {
-
-   urlDatabase[req.params.id] = req.body.longURL;
+  const userOn = req.cookies.userID;
+  
+  if (!userOn) {
+    return res.send("You must be signed in to edit")
+  } else {
+   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect('/urls');
+  }
 });
 
 
