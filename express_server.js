@@ -12,12 +12,12 @@ const users = {
   "000000": {
     id: "000000",
     email: "first@hotmail.com",
-    password: "first"
+    password: bcrypt.hashSync("first", 10)
   },
   "123456": {
     id: "123456",
     email: "second@hotmail.com",
-    password: "second"
+    password:  bcrypt.hashSync("second", 10)
   }
 
 };
@@ -82,11 +82,18 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
 
 const user = userFinder(req.body.email);
+console.log(users);
 
   if (user === null) {
     return res.status(403).send("Invalid entry");
   }
-  if (user.email === (req.body.email) && user.password === req.body.password) {
+  console.log(req.body.password);
+  console.log(bcrypt.hashSync(req.body.password));
+  console.log(user.password);
+  
+  // && bcrypt.compareSync(req.body.password, user.password) === true
+  // && user.password === req.body.password
+  if (user.email === (req.body.email) && bcrypt.compareSync(req.body.password, user.password) === true) {
     res.cookie('user_id', user.id);
     res.redirect('/urls');
   } else {
@@ -100,8 +107,7 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-// get login page
-// potential issue change urlDatabase ----------------------------------
+
 app.get("/login", (req, res) => {
   const userOn = req.cookies.user_id;
   const templateVars = { 
@@ -308,8 +314,10 @@ app.post("/register", (req, res) => {
   users[userID] =  {
     id: userID,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, 10)
   }
+  // console.log(users);
+  // console.log(users[userID].password);
 
   res.cookie('user_id', userID);
   // console.log(users)
