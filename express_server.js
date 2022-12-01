@@ -8,12 +8,12 @@ app.set("view engine", "ejs");
 
 
 const users = {
-  user1: {
+  "000000": {
     id: "000000",
     email: "first@hotmail.com",
     password: "first"
   },
-  user2: {
+  "123456": {
     id: "123456",
     email: "second@hotmail.com",
     password: "second"
@@ -28,17 +28,14 @@ const urlDatabase = {
 };
 
 
-
 const userFinder = (email) => {
   for (let user in users) {
     if (email === users[user].email) {
-      return user;
+      return users[user];
     }
   }
   return null;
 };
-
-
 
 
 
@@ -54,10 +51,10 @@ const generateRandomString = () => {
   return randomed;
 };
 
-
 app.use(express.urlencoded({ extended: true }));
 
 const cookieParser = require('cookie-parser');
+const { restart } = require("nodemon");
 app.use(cookieParser());
 
 
@@ -68,14 +65,23 @@ app.get("/", (req, res) => {
 //adding login 
 app.post("/login", (req, res) => {
 
-  // Change/ check this  ------------------------------------------------------
-  res.cookie('username', req.body.username);
-  res.redirect('/login');
+const user = userFinder(req.body.email);
+
+  if (user === null) {
+    return res.status(403).send("Invalid entry");
+  }
+  if (user.email === (req.body.email) && user.password === req.body.password) {
+    res.cookie('user_id', user.id);
+    res.redirect('/urls');
+  } else {
+    return res.status(403).send("Invalid entry");
+  }
+
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 // get login page
@@ -107,15 +113,15 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase, 
     user: users[req.cookies.user_id],
-
    };
-   console.log("user", users)
-   console.log("req", req.cookies.user_id);
+
+  //  console.log("user", users)
+  //  console.log("req", req.cookies.user_id);
   res.render("urls_index", templateVars);
 });
  
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
+
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls`);
@@ -172,7 +178,6 @@ app.get("/register", (req, res) => {
 
   const templateVars = {
     user: users[req.cookies.user_id],
-    
   };
   res.render("urls_register", templateVars);
 });
@@ -190,14 +195,10 @@ app.post("/registerAccount", (req, res) => {
  
   if (req.body.email === "" || req.body.password === "") {
     return res.status(400).send("Error: Credentials are empty.");
-
   }
-
-  if (userFinder(req.body.email === null)) {
+  if (userFinder(req.body.email) !== null) {
     return res.status(400).send("Error: User alredy exists.");
-
   }
-
   users[userID] =  {
     id: userID,
     email: req.body.email,
