@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -288,14 +289,14 @@ app.get("/register", (req, res) => {
   } 
 });
 
+// app.post("/register", (req, res) => {
+
+//   res.redirect("/register");
+// })
+
+
+//----------------------------------- 
 app.post("/register", (req, res) => {
-
-  res.redirect("/register");
-})
-
-
-// register or register account ?? check out ----------------------------------- 
-app.post("/registerAccount", (req, res) => {
   let userID = generateRandomString();
  
   if (req.body.email === "" || req.body.password === "") {
