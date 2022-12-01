@@ -19,21 +19,21 @@
       </div>
     </div>
     <% if (user === undefined) { %>
-      <form class="nav-item nav-link" action="/login" method="POST">
-        <!-- <input type="text"  name="email"> -->
+      <!-- <form class="nav-item nav-link" action="/login" method="POST">
+         <input type="text"  name="email"> 
         <button type="submit" class="btn btn-primary">Log in</button></form>
 
         <form class="nav-item nav-link" action="/register" method="POST">
-          <!-- <input type="text"  name="email"> -->
-          <button type="submit" class="btn btn-primary">Register</button></form>
-   <!-- <div class="navbar-nav">
+          <input type="text"  name="email"> 
+          <button type="submit" class="btn btn-primary">Register</button></form>  -->
+   <div class="navbar-nav">
     <a class="nav-item nav-link" href="/login">Login</a>
     <a class="nav-item nav-link" href="/register">Register</a>
-   </div> -->
+   </div> 
 
     <% } else { %>
       <form method="POST" action="/logout">
-        <label >User: <%= user.email %> </label>
+        <label >Logged in as: <%= user.email %> </label>
         <button type="submit" class="btn btn-primary">Logout</button>
         </form>
     <% } %>
