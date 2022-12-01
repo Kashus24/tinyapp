@@ -129,13 +129,21 @@ app.get("/hello", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const userOn = req.cookies.user_id
+  const currentUserId = req.cookies.user_id
+  // filter urldatabase based on the user id 
+  // call function urlForUsers()
+  // return the filtered database
+  // update template vars 
+  
+  const filteredUrls = urlForUsers(currentUserId)
+  // console.log(filteredUrls);
+
   const templateVars = { 
-    urls: urlDatabase, 
-    user: users[userOn],
+    urls: filteredUrls, 
+    user: users[currentUserId],
    };
 
-   if (!userOn) {
+   if (!currentUserId) {
      return res.send("Must login or register to continue")
    } else {
     res.render("urls_index", templateVars);
@@ -176,12 +184,22 @@ app.get("/urls/:id", (req, res) => {
   const dataCheck = urlForUsers(req.cookies.user_id);
   const userOn = req.cookies.user_id;
   const shortURL = req.params.id;
+// console.log({shortURL, userOn, dataCheck });
+
+
+  if (urlDatabase[shortURL] === undefined) {
+  return res.send("Error: Requested id does not exist.");
+}
 
   const templateVars = { 
     id: req.params.id, 
-    longURL: urlDatabase[req.params.id].longURL, 
+    longURL: urlDatabase[shortURL].longURL, 
     user: users[req.cookies.user_id], 
     urls: dataCheck };
+
+    // if (urlDshortURL === undefined) {
+    //   return res.send("Error: Requested id does not exit.");
+    // }
 
     if (!userOn) {
       return res.send("Error: Please log in or register to continue.");
@@ -199,7 +217,7 @@ app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id].longURL;
 
   if (!urlDatabase[req.params.id]) {
-    res.send("Short URL does not exit.");
+    res.send("Short URL does not exist.");
   } else {
     res.redirect(longURL);
   }
@@ -207,10 +225,26 @@ app.get("/u/:id", (req, res) => {
 
 
 app.post("/urls/:id/delete", (req, res) => {
-  const userOn = req.cookies.userID;
+  const filteredURLs = urlForUsers(req.cookies.user_id);
 
-  if (!userOn) {
+  const userOn = req.cookies.user_id;
+  const shortURL = req.params.id;
+
+  if (urlDatabase[shortURL] === undefined) {
+    return res.send("Error: Requested id does not exist.");
+  }
+// implement urlforusers
+ // if (filteredURLs !== )
+
+if (userOn !== urlDatabase[shortURL].userID) {
+  return res.send("Cannot delete a link you don't own")
+}
+
+ if (!userOn) {
     return res.send("You must be logged in to delete.")
+
+  // } else if (userOn && dataCheck !== urlDatabase) {
+
   } else {
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
@@ -229,13 +263,13 @@ app.get("/urls/:id/edit", (req, res) => {
 
 
 app.post("/urls/:id/edit", (req, res) => {
-  const userOn = req.cookies.userID;
+  const userOn = req.cookies.user_id;
   
   if (!userOn) {
     return res.send("You must be signed in to edit")
   } else {
    urlDatabase[req.params.id].longURL = req.body.longURL;
-  res.redirect('/urls');
+   res.redirect('/urls');
   }
 });
 
@@ -260,7 +294,7 @@ app.post("/register", (req, res) => {
 })
 
 
-
+// register or register account ?? check out ----------------------------------- 
 app.post("/registerAccount", (req, res) => {
   let userID = generateRandomString();
  
